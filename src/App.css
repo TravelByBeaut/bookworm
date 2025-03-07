@@ -1,0 +1,104 @@
+.App {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  margin: auto;
+  min-height: 95.7vh;
+  background-color: rgb(72, 120, 72);
+}
+
+.book-input {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.book-input input {
+  padding: 8px;
+  width: 60%;
+  margin-right: 10px;
+}
+
+.book-input button {
+  padding: 0 10px;
+  cursor: pointer;
+  background-color: rgb(8, 164, 8);
+  color: rgb(250, 241, 241);
+  border-radius: 5px;
+  font-size: xx-large;
+}
+
+.book-input button:hover {
+  background-color: rgb(4, 114, 4);
+}
+
+.reading-columns {
+  display: flex;
+  margin: 50px 100px;
+  justify-content: space-between;
+  color: rgb(250, 241, 241);
+}
+
+.column {
+  width: 30%;
+  padding: 10px;
+  border: 1px solid grey;
+  background-color: rgb(94, 51, 51);
+}
+
+.column ul {
+  padding: 0;
+}
+
+.column li {
+  background-color: rgba(166, 113, 113, 0.363);
+  padding: 10px;
+  margin: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-btn {
+  height: 30px;
+  padding: 5px;
+  cursor: pointer;
+  transition: transform 0.5s;
+}
+
+.delete-btn:hover {
+  height: 30px;
+  padding: 5px;
+  animation: spin 0.75s forwards;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg); /* Start from original position */
+  }
+  to {
+    transform: rotate(360deg); /* End at 360 degrees */
+  }
+}
+
+.arrow-btn,
+.tick-btn {
+  all: unset; 
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: x-large;
+}
+
+.arrow-btn:hover {
+  font-size: xx-large;
+}
+
+.tick-btn:hover {
+  font-size: xx-large;
+  color: rgb(8, 164, 8);
+}
+
+.column li:hover {
+  background-color: rgba(166, 113, 113, 0.5);
+  cursor: pointer;
+}

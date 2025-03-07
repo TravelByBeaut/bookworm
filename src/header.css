@@ -1,0 +1,12 @@
+.header {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.worm {
+    height: 100px;
+    margin: 0 20px;
+    padding: 10px 0;
+}
