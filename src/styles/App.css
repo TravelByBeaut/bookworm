@@ -1,0 +1,19 @@
+.App {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  margin: auto;
+  min-height: 95.7vh;
+  background-color: rgb(72, 120, 72);
+}
+
+.nav ul {
+  list-style-type: none;
+  display: inline-flex;
+}
+
+.nav a {
+  all: unset;
+  cursor: pointer;
+  padding: 0 20px;
+}
