@@ -1,0 +1,16 @@
+.year-btn {
+  padding: 0 10px;
+  cursor: pointer;
+  background-color: rgb(8, 164, 8);
+  color: rgb(250, 241, 241);
+  border-radius: 5px;
+  font-size: x-large;
+}
+
+.year-btn:hover {
+  background-color: rgb(4, 114, 4);
+}
+
+.year-btn_clicked {
+  background-color: rgb(94, 51, 51);
+}

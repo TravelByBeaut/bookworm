@@ -1,3 +1,9 @@
+.graph {
+  margin-top: 20px;
+	border: 1px solid #ccc;
+	padding: 10px;
+}
+
 .book-input {
   display: flex;
   justify-content: center;
@@ -27,6 +33,24 @@
   padding: 8px;
   border-radius: 5px;
   margin-right: 10px;
+}
+
+.year-input-container .year-input {
+  width: 100px;
+  text-align: center;
+  font-size: 20px;
+  border: none;
+  margin-right: 0;
+}
+
+.year-input-container {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.add-btn {
+  margin-left: 10px;
 }
 
 .reading-columns {

@@ -1,70 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import bin from '../images/bin.png';
 import '../styles/bookList.css';
-import { Bar } from 'react-chartjs-2';
-import {
-	Chart as ChartJS,
-	CategoryScale,
-	LinearScale,
-	BarElement,
-	Title,
-	Tooltip,
-	Legend,
-} from 'chart.js';
-
-ChartJS.register(
-	CategoryScale,
-	LinearScale,
-	BarElement,
-	Title,
-	Tooltip,
-	Legend
-);
-
-export enum Status {
-	ToRead = 'to-read',
-	Reading = 'reading',
-	Read = 'read',
-}
-interface Book {
-	id: number;
-	title: string;
-	status: Status;
-	month: number;
-}
-
-interface DateCount {
-	month: string;
-	count: number;
-}
+import { Book, DateCountByYear, months, Status } from '../App';
 
 interface DateCountProps {
-	dateCount: { [key: number]: DateCount };
-	setDateCount: React.Dispatch<
-		React.SetStateAction<{ [key: string]: DateCount }>
-	>;
+	dateCount: DateCountByYear;
+	setDateCount: React.Dispatch<React.SetStateAction<DateCountByYear>>;
+	books: Book[];
+	setBooks: React.Dispatch<React.SetStateAction<Book[]>>;
+	years: number[];
+	setYears: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
-const months = [
-	'January',
-	'February',
-	'March',
-	'April',
-	'May',
-	'June',
-	'July',
-	'August',
-	'September',
-	'October',
-	'November',
-	'December',
-];
-
-const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
+const BookList: React.FC<DateCountProps> = ({
+	dateCount,
+	setDateCount,
+	books,
+	setBooks,
+	years,
+	setYears,
+}) => {
 	const [title, setTitle] = useState<string>('');
 	const [readTitle, setReadTitle] = useState<string>('');
-	const [books, setBooks] = useState<Book[]>([]);
 	const [selectedOption, setSelectedOption] = useState<string>('');
+	const [year, setYear] = useState<number>(new Date().getFullYear());
+
+	const incrementYear = () => setYear((year) => year + 1);
+	const decrementYear = () => setYear((year) => year - 1);
 
 	useEffect(() => {
 		const storedBooks = localStorage.getItem('books');
@@ -73,10 +35,9 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 			setBooks(JSON.parse(storedBooks));
 		}
 		if (storedDateCount) {
-			console.log('Loaded dateCount from localStorage', storedDateCount);
 			setDateCount(JSON.parse(storedDateCount));
 		}
-	}, []);
+	}, [setDateCount, setBooks]);
 
 	useEffect(() => {
 		if (books.length > 0) {
@@ -86,10 +47,36 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 
 	useEffect(() => {
 		if (dateCount) {
-			console.log('Saving dateCount to localStorage', dateCount);
 			localStorage.setItem('dateCount', JSON.stringify(dateCount));
 		}
 	}, [dateCount]);
+
+	useEffect(() => {
+		if (years) {
+			localStorage.setItem('years', JSON.stringify(years));
+		}
+	}, [years]);
+
+	const addDataToDateCount = (book: Book) => {
+		setDateCount((prevData) => {
+			const { year, month } = book;
+			const newYear = prevData[year] ? { ...prevData[year] } : {};
+			const newMonth = newYear[month]
+				? { ...newYear[month] }
+				: { month: months[month], count: 0 };
+
+			return {
+				...prevData,
+				[year]: {
+					...newYear,
+					[month]: {
+						...newMonth,
+						count: newMonth.count + 1,
+					},
+				},
+			};
+		});
+	};
 
 	const addBook = () => {
 		const date = new Date();
@@ -98,9 +85,16 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 			title,
 			status: Status.ToRead,
 			month: date.getMonth(),
+			year: date.getFullYear(),
 		};
 		setBooks([...books, newBook]);
 		setTitle('');
+		setYears((prevYears) => {
+			if (!prevYears.includes(newBook.year)) {
+				return [...prevYears, newBook.year];
+			}
+			return prevYears;
+		});
 	};
 
 	const addReadBook = () => {
@@ -110,23 +104,49 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 			title: readTitle,
 			status: Status.Read,
 			month: months.findIndex((month) => month === selectedOption),
+			year,
 		};
-		setDateCount((prevData) => {
-			prevData[newBook.month].count += 1;
-			return prevData;
-		});
+		addDataToDateCount(newBook);
 		setBooks([...books, newBook]);
 		setReadTitle('');
+		setYears((prevYears) => {
+			if (!prevYears.includes(year)) {
+				return [...prevYears, year];
+			}
+			return prevYears;
+		});
+	};
+
+	const deleteDataIfEmpty = (data: DateCountByYear, year: number) => {
+		const yearData = data[year];
+
+		for (const month in yearData) {
+			if (yearData[month].count === 0) {
+				delete yearData[month];
+			}
+		}
+		if (Object.keys(yearData).length === 0) {
+			delete data[year];
+		}
 	};
 
 	const deleteBook = (id: number) => {
 		const bookToDelete = books.find((book) => book.id === id);
 		if (bookToDelete) {
 			setDateCount((prevData) => {
+				const { year, month } = bookToDelete;
+				const updatedData = { ...prevData };
+
 				if (bookToDelete.status === Status.Read) {
-					prevData[bookToDelete.month].count -= 1;
+					updatedData[year] = { ...updatedData[year] };
+					updatedData[year][month] = {
+						...updatedData[year][month],
+						count: updatedData[year][month].count - 1,
+					};
 				}
-				return prevData;
+				deleteDataIfEmpty(updatedData, year);
+
+				return updatedData;
 			});
 		}
 
@@ -147,16 +167,25 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 
 		const updatedBook = books.find((book) => book.id === id);
 		if (updatedBook) {
-			setDateCount((prevData) => {
-				if (newStatus === Status.Read && oldStatus !== Status.Read) {
-					prevData[updatedBook.month].count += 1;
-				} else if (oldStatus === Status.Read && newStatus === Status.Read) {
-					return prevData;
-				} else if (oldStatus === Status.Read) {
-					prevData[updatedBook.month].count -= 1;
-				}
-				return prevData;
-			});
+			if (newStatus === Status.Read && oldStatus !== Status.Read) {
+				addDataToDateCount(updatedBook);
+			}
+			if (oldStatus === Status.Read && newStatus === Status.Read) {
+				return;
+			}
+			if (oldStatus === Status.Read && newStatus !== Status.Read) {
+				const { year, month } = updatedBook;
+				setDateCount((prevData) => {
+					const updatedData = { ...prevData };
+					updatedData[year] = { ...updatedData[year] };
+					updatedData[year][month] = {
+						...updatedData[year][month],
+						count: updatedData[year][month].count - 1,
+					};
+					deleteDataIfEmpty(updatedData, year);
+					return updatedData;
+				});
+			}
 		}
 	};
 
@@ -179,42 +208,8 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 		setSelectedOption(event.target.value);
 	};
 
-	const chartData = {
-		labels: Object.values(dateCount).map((monthData) => monthData.month),
-		datasets: [
-			{
-				label: 'Books Read Count',
-				data: Object.values(dateCount).map((monthData) => monthData.count),
-				backgroundColor: 'rgb(94, 51, 51)',
-			},
-		],
-	};
-
-	const chartOptions = {
-		responsive: true,
-		plugins: {
-			legend: {
-				labels: {
-					color: 'rgb(250, 250, 250)',
-				},
-			},
-		},
-		scales: {
-			x: {
-				ticks: {
-					color: 'white',
-				},
-			},
-			y: {
-				ticks: {
-					color: 'white',
-				},
-			},
-		},
-	};
-
 	return (
-		<div className='bookList'>
+		<div className='booklist'>
 			<div className='book-input'>
 				<input
 					type='text'
@@ -239,7 +234,24 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 						</option>
 					))}
 				</select>
-				<button onClick={addReadBook}>+</button>
+				<div className='year-input-container'>
+					<button className='year-btn' onClick={decrementYear}>
+						–
+					</button>
+					<input
+						className='year-input'
+						type='number'
+						value={year}
+						min={1901}
+						onChange={(e) => setYear(Number(e.target.value))}
+					/>
+					<button className='year-btn' onClick={incrementYear}>
+						+
+					</button>
+				</div>
+				<button className='add-btn' onClick={addReadBook}>
+					+
+				</button>
 			</div>
 
 			<div className='reading-columns'>
@@ -336,7 +348,6 @@ const BookList: React.FC<DateCountProps> = ({ dateCount, setDateCount }) => {
 					</ul>
 				</div>
 			</div>
-			<Bar data={chartData} options={chartOptions} />
 		</div>
 	);
 };
