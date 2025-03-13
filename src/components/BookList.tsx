@@ -3,7 +3,7 @@ import bin from '../images/bin.png';
 import '../styles/bookList.css';
 import { Book, DateCountByYear, months, Status } from '../App';
 
-interface DateCountProps {
+interface Props {
 	dateCount: DateCountByYear;
 	setDateCount: React.Dispatch<React.SetStateAction<DateCountByYear>>;
 	books: Book[];
@@ -12,7 +12,7 @@ interface DateCountProps {
 	setYears: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
-const BookList: React.FC<DateCountProps> = ({
+const BookList: React.FC<Props> = ({
 	dateCount,
 	setDateCount,
 	books,
@@ -52,10 +52,49 @@ const BookList: React.FC<DateCountProps> = ({
 	}, [dateCount]);
 
 	useEffect(() => {
-		if (years) {
+		if (years.length > 0) {
 			localStorage.setItem('years', JSON.stringify(years));
 		}
 	}, [years]);
+
+	const addBook = (status: Status) => {
+		const date = new Date();
+		const newBook: Book = {
+			id: date.getMilliseconds(),
+			title,
+			status: status,
+			month: date.getMonth(),
+			year: date.getFullYear(),
+		};
+		setBooks([...books, newBook]);
+		setTitle('');
+		setYears((prevYears) => {
+			if (!prevYears.includes(newBook.year)) {
+				return [...prevYears, newBook.year];
+			}
+			return prevYears;
+		});
+	};
+
+	const addReadBook = () => {
+		const date = new Date();
+		const newBook: Book = {
+			id: date.getMilliseconds(),
+			title: readTitle,
+			status: Status.Completed,
+			month: months.findIndex((month) => month === selectedOption),
+			year,
+		};
+		addDataToDateCount(newBook);
+		setBooks([...books, newBook]);
+		setReadTitle('');
+		setYears((prevYears) => {
+			if (!prevYears.includes(year)) {
+				return [...prevYears, year];
+			}
+			return prevYears;
+		});
+	};
 
 	const addDataToDateCount = (book: Book) => {
 		setDateCount((prevData) => {
@@ -78,45 +117,6 @@ const BookList: React.FC<DateCountProps> = ({
 		});
 	};
 
-	const addBook = () => {
-		const date = new Date();
-		const newBook: Book = {
-			id: date.getMilliseconds(),
-			title,
-			status: Status.ToRead,
-			month: date.getMonth(),
-			year: date.getFullYear(),
-		};
-		setBooks([...books, newBook]);
-		setTitle('');
-		setYears((prevYears) => {
-			if (!prevYears.includes(newBook.year)) {
-				return [...prevYears, newBook.year];
-			}
-			return prevYears;
-		});
-	};
-
-	const addReadBook = () => {
-		const date = new Date();
-		const newBook: Book = {
-			id: date.getMilliseconds(),
-			title: readTitle,
-			status: Status.Read,
-			month: months.findIndex((month) => month === selectedOption),
-			year,
-		};
-		addDataToDateCount(newBook);
-		setBooks([...books, newBook]);
-		setReadTitle('');
-		setYears((prevYears) => {
-			if (!prevYears.includes(year)) {
-				return [...prevYears, year];
-			}
-			return prevYears;
-		});
-	};
-
 	const deleteDataIfEmpty = (data: DateCountByYear, year: number) => {
 		const yearData = data[year];
 
@@ -126,6 +126,9 @@ const BookList: React.FC<DateCountProps> = ({
 			}
 		}
 		if (Object.keys(yearData).length === 0) {
+			setYears((prevYears) =>
+				prevYears.filter((yearWithData) => yearWithData !== year)
+			);
 			delete data[year];
 		}
 	};
@@ -137,7 +140,7 @@ const BookList: React.FC<DateCountProps> = ({
 				const { year, month } = bookToDelete;
 				const updatedData = { ...prevData };
 
-				if (bookToDelete.status === Status.Read) {
+				if (bookToDelete.status === Status.Completed) {
 					updatedData[year] = { ...updatedData[year] };
 					updatedData[year][month] = {
 						...updatedData[year][month],
@@ -167,13 +170,13 @@ const BookList: React.FC<DateCountProps> = ({
 
 		const updatedBook = books.find((book) => book.id === id);
 		if (updatedBook) {
-			if (newStatus === Status.Read && oldStatus !== Status.Read) {
+			if (newStatus === Status.Completed && oldStatus !== Status.Completed) {
 				addDataToDateCount(updatedBook);
 			}
-			if (oldStatus === Status.Read && newStatus === Status.Read) {
+			if (oldStatus === Status.Completed && newStatus === Status.Completed) {
 				return;
 			}
-			if (oldStatus === Status.Read && newStatus !== Status.Read) {
+			if (oldStatus === Status.Completed && newStatus !== Status.Completed) {
 				const { year, month } = updatedBook;
 				setDateCount((prevData) => {
 					const updatedData = { ...prevData };
@@ -189,164 +192,142 @@ const BookList: React.FC<DateCountProps> = ({
 		}
 	};
 
-	const handleDrop = (e: React.DragEvent, newStatus: Status) => {
-		const id = e.dataTransfer.getData('bookId');
-		changeStatus(parseInt(id), newStatus);
-	};
-
 	const filterBooksByStatus = (status: Status) => {
 		return books.filter((book) => book.status === status);
 	};
 
-	const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+	const handleDragStart = (event: React.DragEvent, bookId: number) => {
+		event.dataTransfer.setData('bookId', bookId.toString());
+	};
 
-	const handleDragStart = (e: React.DragEvent, bookId: number) => {
-		e.dataTransfer.setData('bookId', bookId.toString());
+	const handleDragOver = (event: React.DragEvent) => event.preventDefault();
+
+	const handleDrop = (event: React.DragEvent, newStatus: Status) => {
+		const id = event.dataTransfer.getData('bookId');
+		changeStatus(parseInt(id), newStatus);
 	};
 
 	const handleDropdown = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		setSelectedOption(event.target.value);
 	};
 
+	const renderColumns = (
+		status: Status,
+		moveToStatus: Status,
+		icon: string
+	) => {
+		return (
+			<div
+				className='column'
+				onDragOver={handleDragOver}
+				onDrop={(event) => handleDrop(event, status)}
+			>
+				<h2>
+					{status === 'to-read'
+						? 'Want To Read'
+						: `${status.charAt(0).toUpperCase()}${status.slice(1)}`}
+				</h2>
+				<ul>
+					{filterBooksByStatus(status).map((book) => (
+						<li
+							key={book.id}
+							draggable
+							onDragStart={(event) => handleDragStart(event, book.id)}
+						>
+							<img
+								src={bin}
+								alt='bin'
+								className='delete-btn'
+								onClick={() => deleteBook(book.id)}
+							></img>
+							{book.title}
+							<button
+								className={icon === '✔' ? 'tick-btn' : 'arrow-btn'}
+								onClick={() => changeStatus(book.id, moveToStatus)}
+							>
+								{icon}
+							</button>
+						</li>
+					))}
+				</ul>
+			</div>
+		);
+	};
+
 	return (
 		<div className='booklist'>
-			<div className='book-input'>
-				<input
-					type='text'
-					value={title}
-					onChange={(e) => setTitle(e.target.value)}
-					placeholder='Enter a book'
-				/>
-				<button onClick={addBook}>+</button>
-			</div>
-			<div className='book-input'>
-				<input
-					type='text'
-					value={readTitle}
-					onChange={(e) => setReadTitle(e.target.value)}
-					placeholder='Enter a book you have read'
-				/>
-				<select value={selectedOption} onChange={handleDropdown}>
-					<option value=''>--Select a month--</option>
-					{months.map((month, index) => (
-						<option key={index} value={month}>
-							{month}
-						</option>
-					))}
-				</select>
-				<div className='year-input-container'>
-					<button className='year-btn' onClick={decrementYear}>
-						–
-					</button>
+			<div className='book-cards'>
+				<div className='book-card'>
 					<input
-						className='year-input'
-						type='number'
-						value={year}
-						min={1901}
-						onChange={(e) => setYear(Number(e.target.value))}
+						className='book-input'
+						type='text'
+						value={title}
+						onChange={(event) => setTitle(event.target.value)}
+						placeholder='Enter a book'
 					/>
-					<button className='year-btn' onClick={incrementYear}>
-						+
+					<button
+						id='to-read'
+						className='book-input-btn'
+						onClick={() => addBook(Status.ToRead)}
+					>
+						+ Want To Read
+					</button>
+					<button
+						id='reading'
+						className='book-input-btn'
+						onClick={() => addBook(Status.Reading)}
+					>
+						+ Reading
 					</button>
 				</div>
-				<button className='add-btn' onClick={addReadBook}>
-					+
-				</button>
+				<div className='book-card'>
+					<input
+						className='book-input'
+						type='text'
+						value={readTitle}
+						onChange={(event) => setReadTitle(event.target.value)}
+						placeholder='Enter a book you have read'
+					/>
+					<div className='month-year-inputs'>
+						<div className='dropdown-container'>
+							<select value={selectedOption} onChange={handleDropdown}>
+								<option value=''>Select month</option>
+								{months.map((month, index) => (
+									<option key={index} value={month}>
+										{month}
+									</option>
+								))}
+							</select>
+						</div>
+						<div className='year-input-container'>
+							<button className='year-btn' onClick={decrementYear}>
+								–
+							</button>
+							<input
+								className='year-input'
+								type='number'
+								value={year}
+								min={1901}
+								onChange={(event) => setYear(Number(event.target.value))}
+							/>
+							<button className='year-btn' onClick={incrementYear}>
+								+
+							</button>
+						</div>
+					</div>
+					<button
+						id='completed'
+						className='book-input-btn'
+						onClick={addReadBook}
+					>
+						+ Completed
+					</button>
+				</div>
 			</div>
-
 			<div className='reading-columns'>
-				<div
-					className='column'
-					onDragOver={handleDragOver}
-					onDrop={(e) => handleDrop(e, Status.ToRead)}
-				>
-					<h2>Want to Read</h2>
-					<ul>
-						{filterBooksByStatus(Status.ToRead).map((book) => (
-							<li
-								key={book.id}
-								draggable
-								onDragStart={(e) => handleDragStart(e, book.id)}
-							>
-								<img
-									src={bin}
-									alt='bin'
-									className='delete-btn'
-									onClick={() => deleteBook(book.id)}
-								></img>
-								{book.title}
-								<button
-									className='arrow-btn'
-									onClick={() => changeStatus(book.id, Status.Reading)}
-								>
-									→
-								</button>
-							</li>
-						))}
-					</ul>
-				</div>
-
-				<div
-					className='column'
-					onDragOver={handleDragOver}
-					onDrop={(e) => handleDrop(e, Status.Reading)}
-				>
-					<h2>Reading</h2>
-					<ul>
-						{filterBooksByStatus(Status.Reading).map((book) => (
-							<li
-								key={book.id}
-								draggable
-								onDragStart={(e) => handleDragStart(e, book.id)}
-							>
-								<img
-									src={bin}
-									alt='bin'
-									className='delete-btn'
-									onClick={() => deleteBook(book.id)}
-								></img>
-								{book.title}
-								<button
-									className='tick-btn'
-									onClick={() => changeStatus(book.id, Status.Read)}
-								>
-									✔
-								</button>
-							</li>
-						))}
-					</ul>
-				</div>
-
-				<div
-					className='column'
-					onDragOver={handleDragOver}
-					onDrop={(e) => handleDrop(e, Status.Read)}
-				>
-					<h2>Read</h2>
-					<ul>
-						{filterBooksByStatus(Status.Read).map((book) => (
-							<li
-								key={book.id}
-								draggable
-								onDragStart={(e) => handleDragStart(e, book.id)}
-							>
-								<button
-									className='arrow-btn'
-									onClick={() => changeStatus(book.id, Status.Reading)}
-								>
-									←
-								</button>
-								{book.title}
-								<img
-									src={bin}
-									alt='bin'
-									className='delete-btn'
-									onClick={() => deleteBook(book.id)}
-								></img>
-							</li>
-						))}
-					</ul>
-				</div>
+				{renderColumns(Status.ToRead, Status.Reading, '→')}
+				{renderColumns(Status.Reading, Status.Completed, '✔')}
+				{renderColumns(Status.Completed, Status.Reading, '←')}
 			</div>
 		</div>
 	);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Book, DateCountByYear, months, YearlyDateCount } from '../App';
+import { Book, DateCountByYear, months, Status, YearlyDateCount } from '../App';
 import '../styles/graph.css';
 
 import {
@@ -22,19 +22,14 @@ ChartJS.register(
 	Legend
 );
 
-interface DateCountProps {
+interface Props {
 	dateCount: { [key: number]: DateCountByYear };
 	books: Book[];
 	years: number[];
 	setYears: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
-const Graph: React.FC<DateCountProps> = ({
-	dateCount,
-	books,
-	years,
-	setYears,
-}) => {
+const Graph: React.FC<Props> = ({ dateCount, books, years, setYears }) => {
 	const [selectedYear, setSelectedYear] = useState<number>(2025);
 
 	useEffect(() => {
@@ -45,7 +40,12 @@ const Graph: React.FC<DateCountProps> = ({
 	}, [setYears]);
 
 	const booksForYear = selectedYear
-		? books.filter((book) => book.year === selectedYear)
+		? books
+				.filter(
+					(book) =>
+						book.year === selectedYear && book.status === Status.Completed
+				)
+				.sort((a, b) => a.month - b.month)
 		: [];
 
 	const chartData = {
@@ -73,6 +73,7 @@ const Graph: React.FC<DateCountProps> = ({
 				},
 			},
 		},
+		maintainAspectRatio: false,
 		scales: {
 			x: {
 				ticks: {
@@ -91,21 +92,25 @@ const Graph: React.FC<DateCountProps> = ({
 		<div className='graph-container'>
 			<h2>Select a year:</h2>
 			<div>
-				{years.map((year) => (
-					<button
-						className='year-btn'
-						key={year}
-						onClick={() => setSelectedYear(year)}
-					>
-						{year}
-					</button>
-				))}
+				{years
+					.sort((a, b) => a - b)
+					.map((year) => (
+						<button
+							className={
+								selectedYear === year ? 'year-btn_clicked' : 'year-btn'
+							}
+							key={year}
+							onClick={() => setSelectedYear(year)}
+						>
+							{year}
+						</button>
+					))}
 			</div>
 
 			{selectedYear && (
 				<div>
 					<h3>Books read in {selectedYear}</h3>
-					<ul>
+					<ul className='read-books-list'>
 						{booksForYear.map((book, index) => (
 							<li key={index}>
 								{book.title} ({months[book.month]})

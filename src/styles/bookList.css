@@ -1,70 +1,131 @@
-.graph {
-  margin-top: 20px;
-	border: 1px solid #ccc;
-	padding: 10px;
+@media (min-width: 800px) {
+  .book-cards{
+    display: inline flex;
+    width: 85%;
+    justify-self: center;
+  } 
+
+  .book-card {
+    margin: 1rem;
+  }
+
+  div.reading-columns {
+    display: flex;
+    color: rgb(250, 241, 241);
+    .column {
+      max-width: 30%;
+      padding: 0.5rem;
+      border: 1px solid grey;
+      background-color: rgb(94, 51, 51);
+      margin: 0 1rem;
+    }
+  }
+
+  .delete-btn:hover {
+    animation: spin 0.75s forwards;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg); /* Start from original position */
+    }
+    to {
+      transform: rotate(360deg); /* End at 360 degrees */
+    }
+  }
+}
+
+.book-card {
+  display: grid;
+  border: 1px solid rgb(94, 51, 51);
+  background-color: rgb(94, 51, 51);
+  width: 90%;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
 }
 
 .book-input {
+  padding: 1rem;
   display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
+  border-radius: 5px;
 }
 
-.book-input input {
-  padding: 8px;
-  width: 60%;
-  margin-right: 10px;
-}
-
-.book-input button {
-  padding: 0 10px;
+.book-input-btn {
+  display: flex;
   cursor: pointer;
   background-color: rgb(8, 164, 8);
   color: rgb(250, 241, 241);
   border-radius: 5px;
-  font-size: xx-large;
+  padding: 0.5rem 2rem;
+  font-size: large;
+  justify-content: center;
 }
 
-.book-input button:hover {
+.book-input button:hover{
   background-color: rgb(4, 114, 4);
 }
 
 .book-input select {
   padding: 8px;
   border-radius: 5px;
-  margin-right: 10px;
+  margin: 10px;
+} 
+
+.month-year-inputs {
+  display: inline-flex;
 }
 
-.year-input-container .year-input {
-  width: 100px;
-  text-align: center;
-  font-size: 20px;
-  border: none;
-  margin-right: 0;
+.dropdown-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0.25rem 0.75rem 0.25rem 0;
+  padding: 0.5rem 0;
+}
+
+.dropdown-container select {
+  padding: 0.75rem;
+  font-size: medium;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  width: 100%;
 }
 
 .year-input-container {
   display: flex;
+  max-width: fit-content;
   border: 1px solid #ccc;
+  justify-self: center;
   border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.year-input-container .year-input {
+  width: 4rem;
+  text-align: center;
+  font-size: 20px;
+  border: none;
+  margin: 0;
 }
 
 .add-btn {
-  margin-left: 10px;
+  margin-left: 1rem;
 }
 
 .reading-columns {
-  display: flex;
-  margin: 50px 100px;
+  display: inline-block;
   justify-content: space-between;
   color: rgb(250, 241, 241);
+  min-height: fit-content;
 }
 
 .column {
-  width: 30%;
-  padding: 10px;
+  width: 90%;
+  padding: 1rem;
   border: 1px solid grey;
   background-color: rgb(94, 51, 51);
+  margin-top: 1rem;
 }
 
 .column ul {
@@ -81,25 +142,10 @@
 }
 
 .delete-btn {
-  height: 30px;
-  padding: 5px;
+  height: 1.75rem;
+  padding: 5px 10px;
   cursor: pointer;
   transition: transform 0.5s;
-}
-
-.delete-btn:hover {
-  height: 30px;
-  padding: 5px;
-  animation: spin 0.75s forwards;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg); /* Start from original position */
-  }
-  to {
-    transform: rotate(360deg); /* End at 360 degrees */
-  }
 }
 
 .arrow-btn,

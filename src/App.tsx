@@ -19,7 +19,7 @@ export type DateCountByYear = {
 export enum Status {
 	ToRead = 'to-read',
 	Reading = 'reading',
-	Read = 'read',
+	Completed = 'completed',
 }
 
 export interface Book {
@@ -46,12 +46,21 @@ export const months = [
 ];
 
 const App: React.FC = () => {
+	const [books, setBooks] = useState<Book[]>(() => {
+		const storedBooks = localStorage.getItem('books');
+		return storedBooks ? JSON.parse(storedBooks) : [];
+	});
+
 	const [dateCount, setDateCount] = useState<DateCountByYear>(() => {
 		const storedData = localStorage.getItem('dateCount');
 		return storedData ? JSON.parse(storedData) : {};
 	});
-	const [books, setBooks] = useState<Book[]>([]);
-	const [years, setYears] = useState<number[]>([]);
+
+	const [years, setYears] = useState<number[]>(() => {
+		const storedYears = localStorage.getItem('years');
+		return storedYears ? JSON.parse(storedYears) : [];
+	});
+
 	return (
 		<BrowserRouter>
 			<div className='App'>
