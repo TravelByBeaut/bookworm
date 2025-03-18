@@ -27,10 +27,20 @@ interface Props {
 	books: Book[];
 	years: number[];
 	setYears: React.Dispatch<React.SetStateAction<number[]>>;
+	authors: string[];
+	setAuthors: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const Graph: React.FC<Props> = ({ dateCount, books, years, setYears }) => {
+const Graph: React.FC<Props> = ({
+	dateCount,
+	books,
+	years,
+	setYears,
+	authors,
+	setAuthors,
+}) => {
 	const [selectedYear, setSelectedYear] = useState<number>(2025);
+	const [selectedAuthor, setSelectedAuthor] = useState<string>('');
 
 	useEffect(() => {
 		const storedYears = localStorage.getItem('years');
@@ -39,11 +49,20 @@ const Graph: React.FC<Props> = ({ dateCount, books, years, setYears }) => {
 		}
 	}, [setYears]);
 
+	useEffect(() => {
+		const storedAuthors = localStorage.getItem('authors');
+		if (storedAuthors) {
+			setAuthors(JSON.parse(storedAuthors));
+		}
+	}, [setAuthors]);
+
 	const booksForYear = selectedYear
 		? books
 				.filter(
 					(book) =>
-						book.year === selectedYear && book.status === Status.Completed
+						book.year === selectedYear &&
+						book.status === Status.Completed &&
+						(!selectedAuthor || book.author === selectedAuthor)
 				)
 				.sort((a, b) => a.month - b.month)
 		: [];
@@ -54,9 +73,18 @@ const Graph: React.FC<Props> = ({ dateCount, books, years, setYears }) => {
 			{
 				label: 'Books Read Count',
 				data: months.map((_, index) => {
-					const monthData = (dateCount[selectedYear] as YearlyDateCount)?.[
-						index
-					];
+					const monthData =
+						(dateCount[selectedYear] as YearlyDateCount)?.[index] ?? 0;
+					if (selectedAuthor) {
+						return books.filter(
+							(book) =>
+								monthData.count &&
+								book.year === selectedYear &&
+								book.status === Status.Completed &&
+								book.author === selectedAuthor &&
+								months[book.month] === monthData.month
+						).length;
+					}
 					return monthData?.count ?? 0;
 				}),
 				backgroundColor: 'rgb(94, 51, 51)',
@@ -89,7 +117,7 @@ const Graph: React.FC<Props> = ({ dateCount, books, years, setYears }) => {
 	};
 
 	return (
-		<div className='graph-container'>
+		<div>
 			<h2>Select a year:</h2>
 			<div>
 				{years
@@ -106,22 +134,38 @@ const Graph: React.FC<Props> = ({ dateCount, books, years, setYears }) => {
 						</button>
 					))}
 			</div>
+			<div className='author-dropdown'>
+				<h2>Filter by Author:</h2>
+				<select
+					value={selectedAuthor}
+					onChange={(event) => setSelectedAuthor(event.target.value)}
+				>
+					<option value=''>Select Author</option>
+					{authors.map((author) => (
+						<option key={author} value={author}>
+							{author}
+						</option>
+					))}
+				</select>
+			</div>
+			<div className='text-container'>
+				<h3>
+					Books read in {selectedYear}
+					{selectedAuthor && ` by ${selectedAuthor}`}
+				</h3>
 
-			{selectedYear && (
-				<div>
-					<h3>Books read in {selectedYear}</h3>
-					<ul className='read-books-list'>
-						{booksForYear.map((book, index) => (
-							<li key={index}>
-								{book.title} ({months[book.month]})
-							</li>
-						))}
-					</ul>
-					<div className='graph'>
-						<Bar data={chartData} options={chartOptions} />
-					</div>
-				</div>
-			)}
+				<ul className='read-books-list'>
+					{booksForYear.map((book, index) => (
+						<li key={index}>
+							{book.title} ({months[book.month]})
+						</li>
+					))}
+				</ul>
+				<p className='total'>Total: {booksForYear.length}</p>
+			</div>
+			<div className='graph'>
+				<Bar data={chartData} options={chartOptions} />
+			</div>
 		</div>
 	);
 };

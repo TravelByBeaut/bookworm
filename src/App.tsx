@@ -25,6 +25,7 @@ export enum Status {
 export interface Book {
 	id: number;
 	title: string;
+	author: string;
 	status: Status;
 	month: number;
 	year: number;
@@ -61,6 +62,11 @@ const App: React.FC = () => {
 		return storedYears ? JSON.parse(storedYears) : [];
 	});
 
+	const [authors, setAuthors] = useState<string[]>(() => {
+		const storedAuthors = localStorage.getItem('authors');
+		return storedAuthors ? JSON.parse(storedAuthors) : [];
+	});
+
 	return (
 		<BrowserRouter>
 			<div className='App'>
@@ -84,6 +90,8 @@ const App: React.FC = () => {
 								books={books}
 								years={years}
 								setYears={setYears}
+								authors={authors}
+								setAuthors={setAuthors}
 							/>
 						}
 					/>
@@ -97,6 +105,8 @@ const App: React.FC = () => {
 								setBooks={setBooks}
 								years={years}
 								setYears={setYears}
+								authors={authors}
+								setAuthors={setAuthors}
 							/>
 						}
 					/>

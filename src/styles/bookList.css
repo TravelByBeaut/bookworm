@@ -60,6 +60,7 @@
   padding: 0.5rem 2rem;
   font-size: large;
   justify-content: center;
+  align-items: center;
 }
 
 .book-input button:hover{
@@ -71,6 +72,25 @@
   border-radius: 5px;
   margin: 10px;
 } 
+
+.book-icon-btn {
+  cursor: pointer;
+  padding: 0.25rem 0.25rem 0;
+  margin-left: 0.25rem;
+  background-color: rgb(8, 164, 8);
+  border-radius: 5px;
+}
+
+.book-icon-btn-image {
+  height: 2rem;
+  width: 2.5rem;
+}
+
+.book-icon {
+  height: 2rem;
+  width: 2.5rem;
+  padding: 0 1rem 0;
+}
 
 .month-year-inputs {
   display: inline-flex;
@@ -128,13 +148,17 @@
   margin-top: 1rem;
 }
 
+.column-h2 {
+  display: flex;
+}
+
 .column ul {
   padding: 0;
 }
 
 .column li {
   background-color: rgba(166, 113, 113, 0.363);
-  padding: 10px;
+  padding: 0.75rem;
   margin: 5px;
   display: flex;
   justify-content: space-between;

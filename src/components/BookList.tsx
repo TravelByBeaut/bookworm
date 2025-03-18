@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import bin from '../images/bin.png';
+import closedBook from '../images/closedbook.png';
+import openBook from '../images/openbook.png';
+import stackedBooks from '../images/stackedbooks.png';
 import '../styles/bookList.css';
 import { Book, DateCountByYear, months, Status } from '../App';
 
@@ -10,6 +13,8 @@ interface Props {
 	setBooks: React.Dispatch<React.SetStateAction<Book[]>>;
 	years: number[];
 	setYears: React.Dispatch<React.SetStateAction<number[]>>;
+	authors: string[];
+	setAuthors: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const BookList: React.FC<Props> = ({
@@ -19,11 +24,17 @@ const BookList: React.FC<Props> = ({
 	setBooks,
 	years,
 	setYears,
+	authors,
+	setAuthors,
 }) => {
 	const [title, setTitle] = useState<string>('');
-	const [readTitle, setReadTitle] = useState<string>('');
+	const [author, setAuthor] = useState('');
+	const [completedTitle, setCompletedTitle] = useState<string>('');
+	const [completedAuthor, setCompletedAuthor] = useState('');
 	const [selectedOption, setSelectedOption] = useState<string>('');
 	const [year, setYear] = useState<number>(new Date().getFullYear());
+	const [editingId, setEditingId] = useState<null | number>(null);
+	const [editedTitle, setEditedTitle] = useState('');
 
 	const incrementYear = () => setYear((year) => year + 1);
 	const decrementYear = () => setYear((year) => year - 1);
@@ -57,17 +68,25 @@ const BookList: React.FC<Props> = ({
 		}
 	}, [years]);
 
+	useEffect(() => {
+		if (authors.length > 0) {
+			localStorage.setItem('authors', JSON.stringify(authors));
+		}
+	}, [authors]);
+
 	const addBook = (status: Status) => {
 		const date = new Date();
 		const newBook: Book = {
 			id: date.getMilliseconds(),
 			title,
+			author,
 			status: status,
 			month: date.getMonth(),
 			year: date.getFullYear(),
 		};
 		setBooks([...books, newBook]);
 		setTitle('');
+		setAuthor('');
 		setYears((prevYears) => {
 			if (!prevYears.includes(newBook.year)) {
 				return [...prevYears, newBook.year];
@@ -76,18 +95,21 @@ const BookList: React.FC<Props> = ({
 		});
 	};
 
-	const addReadBook = () => {
+	const addCompletedBook = () => {
 		const date = new Date();
 		const newBook: Book = {
 			id: date.getMilliseconds(),
-			title: readTitle,
+			title: completedTitle,
+			author: completedAuthor,
 			status: Status.Completed,
 			month: months.findIndex((month) => month === selectedOption),
 			year,
 		};
 		addDataToDateCount(newBook);
 		setBooks([...books, newBook]);
-		setReadTitle('');
+		setAuthors([...authors, completedAuthor]);
+		setCompletedTitle('');
+		setCompletedAuthor('');
 		setYears((prevYears) => {
 			if (!prevYears.includes(year)) {
 				return [...prevYears, year];
@@ -152,8 +174,20 @@ const BookList: React.FC<Props> = ({
 				return updatedData;
 			});
 		}
+		const newBooks = books.filter((book) => book.id !== id);
+		const remainingAuthors = getAuthorsFromBooks(newBooks);
+		setBooks(newBooks);
+		setAuthors(remainingAuthors);
+	};
 
-		setBooks(books.filter((book) => book.id !== id));
+	const getAuthorsFromBooks = (books: Book[]) => {
+		const authorsSet = new Set<string>();
+		books.forEach((book) => {
+			if (book.author && book.status === Status.Completed) {
+				authorsSet.add(book.author);
+			}
+		});
+		return Array.from(authorsSet);
 	};
 
 	const changeStatus = (id: number, newStatus: Status) => {
@@ -172,6 +206,7 @@ const BookList: React.FC<Props> = ({
 		if (updatedBook) {
 			if (newStatus === Status.Completed && oldStatus !== Status.Completed) {
 				addDataToDateCount(updatedBook);
+				setAuthors([...authors, updatedBook.author]);
 			}
 			if (oldStatus === Status.Completed && newStatus === Status.Completed) {
 				return;
@@ -196,6 +231,20 @@ const BookList: React.FC<Props> = ({
 		return books.filter((book) => book.status === status);
 	};
 
+	const handleEdit = (id: number, title: string) => {
+		setEditingId(id);
+		setEditedTitle(title);
+	};
+
+	const handleSave = (id: number) => {
+		setBooks((prevBooks) =>
+			prevBooks.map((book) =>
+				book.id === id ? { ...book, title: editedTitle } : book
+			)
+		);
+		setEditingId(null);
+	};
+
 	const handleDragStart = (event: React.DragEvent, bookId: number) => {
 		event.dataTransfer.setData('bookId', bookId.toString());
 	};
@@ -211,6 +260,27 @@ const BookList: React.FC<Props> = ({
 		setSelectedOption(event.target.value);
 	};
 
+	const renderIcon = (status: Status) => {
+		let icon;
+		let altText;
+
+		switch (status) {
+			case Status.ToRead:
+				icon = closedBook;
+				altText = 'closed book';
+				break;
+			case Status.Reading:
+				icon = openBook;
+				altText = 'open book';
+				break;
+			case Status.Completed:
+				icon = stackedBooks;
+				altText = 'stack of books';
+		}
+
+		return <img className='book-icon' src={icon} alt={altText} />;
+	};
+
 	const renderColumns = (
 		status: Status,
 		moveToStatus: Status,
@@ -222,7 +292,8 @@ const BookList: React.FC<Props> = ({
 				onDragOver={handleDragOver}
 				onDrop={(event) => handleDrop(event, status)}
 			>
-				<h2>
+				<h2 className='column-h2'>
+					{renderIcon(status)}
 					{status === 'to-read'
 						? 'Want To Read'
 						: `${status.charAt(0).toUpperCase()}${status.slice(1)}`}
@@ -240,12 +311,35 @@ const BookList: React.FC<Props> = ({
 								className='delete-btn'
 								onClick={() => deleteBook(book.id)}
 							></img>
-							{book.title}
+							{editingId === book.id ? (
+								<input
+									className='book-title'
+									type='text'
+									value={editedTitle}
+									onChange={(event) => setEditedTitle(event.target.value)}
+									onBlur={() => handleSave(book.id)}
+									onKeyDown={(event) => {
+										if (event.key === 'Enter') handleSave(book.id);
+									}}
+									autoFocus
+								/>
+							) : (
+								<div
+									className='book-title'
+									onClick={() => handleEdit(book.id, book.title)}
+								>
+									{book.title}
+								</div>
+							)}
 							<button
-								className={icon === '✔' ? 'tick-btn' : 'arrow-btn'}
+								className='book-icon-btn'
 								onClick={() => changeStatus(book.id, moveToStatus)}
 							>
-								{icon}
+								<img
+									className='book-icon-btn-image'
+									src={icon}
+									alt='book icon'
+								/>
 							</button>
 						</li>
 					))}
@@ -265,28 +359,42 @@ const BookList: React.FC<Props> = ({
 						onChange={(event) => setTitle(event.target.value)}
 						placeholder='Enter a book'
 					/>
+					<input
+						className='book-input'
+						type='text'
+						value={author}
+						onChange={(event) => setAuthor(event.target.value)}
+						placeholder='Enter the author'
+					/>
 					<button
 						id='to-read'
 						className='book-input-btn'
 						onClick={() => addBook(Status.ToRead)}
 					>
-						+ Want To Read
+						{renderIcon(Status.ToRead)} + Want To Read
 					</button>
 					<button
 						id='reading'
 						className='book-input-btn'
 						onClick={() => addBook(Status.Reading)}
 					>
-						+ Reading
+						{renderIcon(Status.Reading)}+ Reading
 					</button>
 				</div>
 				<div className='book-card'>
 					<input
 						className='book-input'
 						type='text'
-						value={readTitle}
-						onChange={(event) => setReadTitle(event.target.value)}
+						value={completedTitle}
+						onChange={(event) => setCompletedTitle(event.target.value)}
 						placeholder='Enter a book you have read'
+					/>
+					<input
+						className='book-input'
+						type='text'
+						value={completedAuthor}
+						onChange={(event) => setCompletedAuthor(event.target.value)}
+						placeholder='Enter the author'
 					/>
 					<div className='month-year-inputs'>
 						<div className='dropdown-container'>
@@ -318,16 +426,16 @@ const BookList: React.FC<Props> = ({
 					<button
 						id='completed'
 						className='book-input-btn'
-						onClick={addReadBook}
+						onClick={addCompletedBook}
 					>
-						+ Completed
+						{renderIcon(Status.Completed)}+ Completed
 					</button>
 				</div>
 			</div>
 			<div className='reading-columns'>
-				{renderColumns(Status.ToRead, Status.Reading, '→')}
-				{renderColumns(Status.Reading, Status.Completed, '✔')}
-				{renderColumns(Status.Completed, Status.Reading, '←')}
+				{renderColumns(Status.ToRead, Status.Reading, openBook)}
+				{renderColumns(Status.Reading, Status.Completed, stackedBooks)}
+				{renderColumns(Status.Completed, Status.Reading, openBook)}
 			</div>
 		</div>
 	);
