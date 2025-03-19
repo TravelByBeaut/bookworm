@@ -27,17 +27,22 @@ const BookList: React.FC<Props> = ({
 	authors,
 	setAuthors,
 }) => {
+	const currentYear = new Date().getFullYear();
 	const [title, setTitle] = useState<string>('');
 	const [author, setAuthor] = useState('');
 	const [completedTitle, setCompletedTitle] = useState<string>('');
 	const [completedAuthor, setCompletedAuthor] = useState('');
 	const [selectedOption, setSelectedOption] = useState<string>('');
-	const [year, setYear] = useState<number>(new Date().getFullYear());
+	const [year, setYear] = useState<number>(currentYear);
 	const [editingId, setEditingId] = useState<null | number>(null);
 	const [editedTitle, setEditedTitle] = useState('');
+	const [toReadPage, setToReadPage] = useState(0);
+	const [readingPage, setReadingPage] = useState(0);
+	const [completedPage, setCompletedPage] = useState(0);
 
 	const incrementYear = () => setYear((year) => year + 1);
-	const decrementYear = () => setYear((year) => year - 1);
+	const decrementYear = () =>
+		setYear((year) => (year > currentYear ? currentYear - 1 : year - 1));
 
 	useEffect(() => {
 		const storedBooks = localStorage.getItem('books');
@@ -228,7 +233,12 @@ const BookList: React.FC<Props> = ({
 	};
 
 	const filterBooksByStatus = (status: Status) => {
-		return books.filter((book) => book.status === status);
+		return books
+			.filter((book) => book.status === status)
+			.sort((a, b) => {
+				if (a.year !== b.year) return b.year - a.year;
+				return b.month - a.month;
+			});
 	};
 
 	const handleEdit = (id: number, title: string) => {
@@ -286,6 +296,26 @@ const BookList: React.FC<Props> = ({
 		moveToStatus: Status,
 		icon: string
 	) => {
+		const itemsPerPage = 5;
+		const allBooks = filterBooksByStatus(status);
+		const currentPage =
+			status === Status.ToRead
+				? toReadPage
+				: status === Status.Reading
+				? readingPage
+				: completedPage;
+
+		const paginatedBooks = allBooks.slice(0, (currentPage + 1) * itemsPerPage);
+
+		const showMoreOrLess = (symbol: '+' | '-') => {
+			if (status === Status.ToRead)
+				setToReadPage((prev) => (symbol === '+' ? prev + 1 : prev - 1));
+			if (status === Status.Reading)
+				setReadingPage((prev) => (symbol === '+' ? prev + 1 : prev - 1));
+			if (status === Status.Completed)
+				setCompletedPage((prev) => (symbol === '+' ? prev + 1 : prev - 1));
+		};
+
 		return (
 			<div
 				className='column'
@@ -299,7 +329,7 @@ const BookList: React.FC<Props> = ({
 						: `${status.charAt(0).toUpperCase()}${status.slice(1)}`}
 				</h2>
 				<ul>
-					{filterBooksByStatus(status).map((book) => (
+					{paginatedBooks.map((book) => (
 						<li
 							key={book.id}
 							draggable
@@ -310,7 +340,7 @@ const BookList: React.FC<Props> = ({
 								alt='bin'
 								className='delete-btn'
 								onClick={() => deleteBook(book.id)}
-							></img>
+							/>
 							{editingId === book.id ? (
 								<input
 									className='book-title'
@@ -344,12 +374,22 @@ const BookList: React.FC<Props> = ({
 						</li>
 					))}
 				</ul>
+				{currentPage > 0 && (
+					<button onClick={() => showMoreOrLess('-')} className='show-less-btn'>
+						Show Less
+					</button>
+				)}
+				{allBooks.length > paginatedBooks.length && (
+					<button onClick={() => showMoreOrLess('+')} className='show-more-btn'>
+						Show More
+					</button>
+				)}
 			</div>
 		);
 	};
 
 	return (
-		<div className='booklist'>
+		<div>
 			<div className='book-cards'>
 				<div className='book-card'>
 					<input
@@ -413,9 +453,9 @@ const BookList: React.FC<Props> = ({
 							</button>
 							<input
 								className='year-input'
-								type='number'
-								value={year}
-								min={1901}
+								type='text'
+								inputMode='numeric'
+								value={year > currentYear ? currentYear : year}
 								onChange={(event) => setYear(Number(event.target.value))}
 							/>
 							<button className='year-btn' onClick={incrementYear}>

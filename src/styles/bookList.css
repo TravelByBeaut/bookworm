@@ -1,7 +1,15 @@
-@media (min-width: 800px) {
+@media (min-width: 500px) and (max-width: 899px) {
+  .book-cards,
+  .reading-columns {
+    display: grid;
+    width: 70%;
+    justify-self: center;
+  } 
+}
+
+@media (min-width: 900px) {
   .book-cards{
     display: inline flex;
-    width: 85%;
     justify-self: center;
   } 
 
@@ -13,11 +21,10 @@
     display: flex;
     color: rgb(250, 241, 241);
     .column {
-      max-width: 30%;
       padding: 0.5rem;
       border: 1px solid grey;
       background-color: rgb(94, 51, 51);
-      margin: 0 1rem;
+      margin: 0 0.5rem;
     }
   }
 
@@ -27,43 +34,46 @@
   
   @keyframes spin {
     from {
-      transform: rotate(0deg); /* Start from original position */
+      transform: rotate(0deg);
     }
     to {
-      transform: rotate(360deg); /* End at 360 degrees */
+      transform: rotate(360deg);
     }
   }
 }
 
 .book-card {
   display: grid;
-  border: 1px solid rgb(94, 51, 51);
   background-color: rgb(94, 51, 51);
+  border: 1px solid rgb(94, 51, 51);
+  border-radius: 8px;
   width: 90%;
   padding: 1rem;
-  border-radius: 8px;
   margin-top: 1rem;
 }
 
 .book-input {
-  padding: 1rem;
   display: flex;
   border-radius: 5px;
+  padding: 1rem;
 }
 
 .book-input-btn {
   display: flex;
-  cursor: pointer;
-  background-color: rgb(8, 164, 8);
-  color: rgb(250, 241, 241);
-  border-radius: 5px;
   padding: 0.5rem 2rem;
   font-size: large;
   justify-content: center;
   align-items: center;
 }
 
-.book-input button:hover{
+button {
+  cursor: pointer;
+  background-color: rgb(8, 164, 8);
+  border-radius: 5px;
+  color: rgb(250, 241, 241);
+}
+
+button:hover{
   background-color: rgb(4, 114, 4);
 }
 
@@ -74,11 +84,8 @@
 } 
 
 .book-icon-btn {
-  cursor: pointer;
   padding: 0.25rem 0.25rem 0;
   margin-left: 0.25rem;
-  background-color: rgb(8, 164, 8);
-  border-radius: 5px;
 }
 
 .book-icon-btn-image {
@@ -116,8 +123,8 @@
   display: flex;
   max-width: fit-content;
   border: 1px solid #ccc;
-  justify-self: center;
   border-radius: 6px;
+  justify-self: center;
   margin: 1rem 0;
 }
 
@@ -135,16 +142,16 @@
 
 .reading-columns {
   display: inline-block;
-  justify-content: space-between;
+  justify-self: center;
   color: rgb(250, 241, 241);
-  min-height: fit-content;
 }
 
 .column {
   width: 90%;
   padding: 1rem;
-  border: 1px solid grey;
   background-color: rgb(94, 51, 51);
+  border: 1px solid grey;
+  border-radius: 8px;
   margin-top: 1rem;
 }
 
@@ -168,28 +175,16 @@
 .delete-btn {
   height: 1.75rem;
   padding: 5px 10px;
-  cursor: pointer;
   transition: transform 0.5s;
-}
-
-.arrow-btn,
-.tick-btn {
-  all: unset; 
-  margin-left: 10px;
-  cursor: pointer;
-  font-size: x-large;
-}
-
-.arrow-btn:hover {
-  font-size: xx-large;
-}
-
-.tick-btn:hover {
-  font-size: xx-large;
-  color: rgb(8, 164, 8);
 }
 
 .column li:hover {
   background-color: rgba(166, 113, 113, 0.5);
   cursor: pointer;
+}
+
+.show-more-btn,
+.show-less-btn {
+  padding: 0.25rem;
+  margin-left: 0.25rem;
 }
