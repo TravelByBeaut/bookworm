@@ -1,10 +1,19 @@
 .App {
   font-family: Arial, sans-serif;
   text-align: center;
+  background-color: rgb(72, 120, 72);
   padding: 2rem;
   margin: auto;
-  background-color: rgb(72, 120, 72);
+  height: 100%;
 }
+
+@media (min-width: 900px) {
+  .container {
+    width: 80%;
+    justify-self: center;
+  }
+}
+  
 
 .nav ul {
   list-style: none;

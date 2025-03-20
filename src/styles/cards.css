@@ -1,44 +1,20 @@
-@media (min-width: 500px) and (max-width: 899px) {
-  .book-cards,
-  .reading-columns {
+@media (min-width: 500px) and (max-width: 999px) {
+  .book-cards {
     display: grid;
     width: 70%;
     justify-self: center;
   } 
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1000px) {
   .book-cards{
     display: inline flex;
     justify-self: center;
+    width: 80%;
   } 
 
   .book-card {
     margin: 1rem;
-  }
-
-  div.reading-columns {
-    display: flex;
-    color: rgb(250, 241, 241);
-    .column {
-      padding: 0.5rem;
-      border: 1px solid grey;
-      background-color: rgb(94, 51, 51);
-      margin: 0 0.5rem;
-    }
-  }
-
-  .delete-btn:hover {
-    animation: spin 0.75s forwards;
-  }
-  
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
   }
 }
 
@@ -140,51 +116,29 @@ button:hover{
   margin-left: 1rem;
 }
 
-.reading-columns {
-  display: inline-block;
-  justify-self: center;
-  color: rgb(250, 241, 241);
-}
-
-.column {
-  width: 90%;
+.input-error {
+  border: 2px solid #ff7b7b;
+  background-color: #fff5f5;
+  border-radius: 5px;
   padding: 1rem;
-  background-color: rgb(94, 51, 51);
-  border: 1px solid grey;
-  border-radius: 8px;
-  margin-top: 1rem;
 }
 
-.column-h2 {
-  display: flex;
-}
-
-.column ul {
-  padding: 0 0.75rem;
-}
-
-.column li {
-  background-color: rgba(166, 113, 113, 0.363);
-  padding: 0.75rem;
-  margin: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.delete-btn {
-  height: 1.75rem;
-  padding: 5px 10px;
-  transition: transform 0.5s;
-}
-
-.column li:hover {
-  background-color: rgba(166, 113, 113, 0.5);
-  cursor: pointer;
-}
-
-.show-more-btn,
-.show-less-btn {
+.validation-popup {
+  color: #f3b0b0;
+  font-weight: bold;
+  margin: 0.25rem 0;
   padding: 0.25rem;
-  margin-left: 0.25rem;
+  border-radius: 5px;
+  animation: pop-in 0.5s ease;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

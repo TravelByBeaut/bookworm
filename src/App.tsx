@@ -1,118 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './styles/App.css';
 import Header from './components/Header';
-import BookList from './components/BookList';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Graph from './components/Graph';
-
-export type YearlyDateCount = {
-	[monthIndex: number]: {
-		month: string;
-		count: number;
-	};
-};
-
-export type DateCountByYear = {
-	[year: number]: YearlyDateCount;
-};
-
-export enum Status {
-	ToRead = 'to-read',
-	Reading = 'reading',
-	Completed = 'completed',
-}
-
-export interface Book {
-	id: number;
-	title: string;
-	author: string;
-	status: Status;
-	month: number;
-	year: number;
-}
-
-export const months = [
-	'January',
-	'February',
-	'March',
-	'April',
-	'May',
-	'June',
-	'July',
-	'August',
-	'September',
-	'October',
-	'November',
-	'December',
-];
+import BookList from './pages/BookList';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import Graph from './pages/Graph';
+import { BookProvider } from './components/Context';
 
 const App: React.FC = () => {
-	const [books, setBooks] = useState<Book[]>(() => {
-		const storedBooks = localStorage.getItem('books');
-		return storedBooks ? JSON.parse(storedBooks) : [];
-	});
-
-	const [dateCount, setDateCount] = useState<DateCountByYear>(() => {
-		const storedData = localStorage.getItem('dateCount');
-		return storedData ? JSON.parse(storedData) : {};
-	});
-
-	const [years, setYears] = useState<number[]>(() => {
-		const storedYears = localStorage.getItem('years');
-		return storedYears ? JSON.parse(storedYears) : [];
-	});
-
-	const [authors, setAuthors] = useState<string[]>(() => {
-		const storedAuthors = localStorage.getItem('authors');
-		return storedAuthors ? JSON.parse(storedAuthors) : [];
-	});
-
 	return (
-		<BrowserRouter>
-			<div className='App'>
-				<nav className='nav'>
-					<ul>
-						<li>
-							<a href='/'>Graph</a>
-						</li>
-						<li>
-							<a href='/booklist'>Book List</a>
-						</li>
-					</ul>
-				</nav>
-				<Header />
-				<Routes>
-					<Route
-						path='/'
-						element={
-							<Graph
-								dateCount={dateCount}
-								books={books}
-								years={years}
-								setYears={setYears}
-								authors={authors}
-								setAuthors={setAuthors}
-							/>
-						}
-					/>
-					<Route
-						path='/booklist'
-						element={
-							<BookList
-								dateCount={dateCount}
-								setDateCount={setDateCount}
-								books={books}
-								setBooks={setBooks}
-								years={years}
-								setYears={setYears}
-								authors={authors}
-								setAuthors={setAuthors}
-							/>
-						}
-					/>
-				</Routes>
-			</div>
-		</BrowserRouter>
+		<BookProvider>
+			<BrowserRouter>
+				<div className='App'>
+					<div className='container'>
+						<nav className='nav'>
+							<ul>
+								<li>
+									<Link to='/'>Graph</Link>
+								</li>
+								<li>
+									<Link to='/booklist'>Book List</Link>
+								</li>
+							</ul>
+						</nav>
+						<Header />
+						<Routes>
+							<Route path='/' element={<Graph />} />
+							<Route path='/booklist' element={<BookList />} />
+						</Routes>
+					</div>
+				</div>
+			</BrowserRouter>
+		</BookProvider>
 	);
 };
 

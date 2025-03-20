@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Book, DateCountByYear, months, Status, YearlyDateCount } from '../App';
+import { months, Status, YearlyDateCount } from '../utils';
 import '../styles/graph.css';
 
 import {
@@ -12,6 +12,7 @@ import {
 	Tooltip,
 	Legend,
 } from 'chart.js';
+import { useBookContext } from '../components/Context';
 
 ChartJS.register(
 	CategoryScale,
@@ -22,39 +23,10 @@ ChartJS.register(
 	Legend
 );
 
-interface Props {
-	dateCount: { [key: number]: DateCountByYear };
-	books: Book[];
-	years: number[];
-	setYears: React.Dispatch<React.SetStateAction<number[]>>;
-	authors: string[];
-	setAuthors: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
-const Graph: React.FC<Props> = ({
-	dateCount,
-	books,
-	years,
-	setYears,
-	authors,
-	setAuthors,
-}) => {
+const Graph: React.FC = () => {
+	const { dateCount, books, years, authors } = useBookContext();
 	const [selectedYear, setSelectedYear] = useState<number>(2025);
 	const [selectedAuthor, setSelectedAuthor] = useState<string>('');
-
-	useEffect(() => {
-		const storedYears = localStorage.getItem('years');
-		if (storedYears) {
-			setYears(JSON.parse(storedYears));
-		}
-	}, [setYears]);
-
-	useEffect(() => {
-		const storedAuthors = localStorage.getItem('authors');
-		if (storedAuthors) {
-			setAuthors(JSON.parse(storedAuthors));
-		}
-	}, [setAuthors]);
 
 	const booksForYear = selectedYear
 		? books
