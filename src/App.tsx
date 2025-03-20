@@ -1,31 +1,23 @@
 import React from 'react';
-import './styles/App.css';
+import './styles/app.css';
 import Header from './components/Header';
 import BookList from './pages/BookList';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import Graph from './pages/Graph';
 import { BookProvider } from './components/Context';
+import Home from './pages/Home';
 
 const App: React.FC = () => {
 	return (
 		<BookProvider>
 			<BrowserRouter>
-				<div className='App'>
+				<div className='app'>
 					<div className='container'>
-						<nav className='nav'>
-							<ul>
-								<li>
-									<Link to='/'>Graph</Link>
-								</li>
-								<li>
-									<Link to='/booklist'>Book List</Link>
-								</li>
-							</ul>
-						</nav>
 						<Header />
 						<Routes>
-							<Route path='/' element={<Graph />} />
+							<Route path='/' element={<Home />} />
 							<Route path='/booklist' element={<BookList />} />
+							<Route path='/graph' element={<Graph />} />
 						</Routes>
 					</div>
 				</div>

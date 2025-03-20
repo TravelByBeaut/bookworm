@@ -90,54 +90,71 @@ const Graph: React.FC = () => {
 
 	return (
 		<div>
-			<h2>Select a year:</h2>
-			<div>
-				{years
-					.sort((a, b) => a - b)
-					.map((year) => (
-						<button
-							className={
-								selectedYear === year ? 'year-btn_clicked' : 'year-btn'
-							}
-							key={year}
-							onClick={() => setSelectedYear(year)}
+			{booksForYear.length > 0 ? (
+				<div>
+					<h2>Select a year:</h2>
+					<div>
+						{years
+							.sort((a, b) => a - b)
+							.map((year) => (
+								<button
+									className={
+										selectedYear === year ? 'year-btn_clicked' : 'year-btn'
+									}
+									key={year}
+									onClick={() => setSelectedYear(year)}
+								>
+									{year}
+								</button>
+							))}
+					</div>
+					<div className='author-dropdown'>
+						<h2>Filter by Author:</h2>
+						<select
+							value={selectedAuthor}
+							onChange={(event) => setSelectedAuthor(event.target.value)}
 						>
-							{year}
-						</button>
-					))}
-			</div>
-			<div className='author-dropdown'>
-				<h2>Filter by Author:</h2>
-				<select
-					value={selectedAuthor}
-					onChange={(event) => setSelectedAuthor(event.target.value)}
-				>
-					<option value=''>Select Author</option>
-					{authors.map((author) => (
-						<option key={author} value={author}>
-							{author}
-						</option>
-					))}
-				</select>
-			</div>
-			<div className='text-container'>
-				<h3>
-					Books read in {selectedYear}
-					{selectedAuthor && ` by ${selectedAuthor}`}
-				</h3>
+							<option value=''>Select Author</option>
+							{authors.map((author) => (
+								<option key={author} value={author}>
+									{author}
+								</option>
+							))}
+						</select>
+					</div>
 
-				<ul className='read-books-list'>
-					{booksForYear.map((book, index) => (
-						<li key={index}>
-							{book.title} ({months[book.month]})
-						</li>
-					))}
-				</ul>
-				<p className='total'>Total: {booksForYear.length}</p>
-			</div>
-			<div className='graph'>
-				<Bar data={chartData} options={chartOptions} />
-			</div>
+					<div className='text-container'>
+						<h3>
+							Books read in {selectedYear}
+							{selectedAuthor && ` by ${selectedAuthor}`}
+						</h3>
+
+						<ul className='read-books-list'>
+							{booksForYear.map((book, index) => (
+								<li key={index}>
+									{book.title} ({months[book.month]})
+								</li>
+							))}
+						</ul>
+						<p className='total'>Total: {booksForYear.length}</p>
+					</div>
+					<div className='graph'>
+						<Bar data={chartData} options={chartOptions} />
+					</div>
+				</div>
+			) : (
+				<div>
+					<p className='no-books'>
+						Complete a book in
+						<button className='link-btn'>
+							<a href='/booklist' className='link'>
+								Book List
+							</a>
+						</button>
+						to unlock new stats on your reading journey!
+					</p>
+				</div>
+			)}
 		</div>
 	);
 };

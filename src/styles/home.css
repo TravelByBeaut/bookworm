@@ -1,0 +1,29 @@
+@media (min-width: 1000px) {
+  .home {
+    max-width: 80%;
+    justify-self: center;
+  }
+}
+
+.home-container {
+  color: rgb(250, 241, 241);
+}
+
+.intro {
+  background-color: rgb(94, 51, 51);
+  border: 1px solid rgb(94, 51, 51);
+  border-radius: 8px;
+  padding: 1rem;
+  line-height: 2;
+}
+
+.link {
+  text-decoration: none;
+  color: rgb(250, 241, 241);
+}
+
+.link-btn {
+  margin: 0.25rem;
+  padding: 0.25rem;
+  font-size: medium;
+}
