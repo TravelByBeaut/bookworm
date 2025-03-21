@@ -3,7 +3,7 @@ import Columns from '../components/Columns';
 import Cards from '../components/Cards';
 import { useBookContext } from '../components/Context';
 
-const BookList: React.FC = () => {
+const BookList = () => {
 	const { dateCount, books, years } = useBookContext();
 
 	useEffect(() => {

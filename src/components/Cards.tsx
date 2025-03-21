@@ -5,8 +5,9 @@ import openBook from '../images/openbook.png';
 import stackedBooks from '../images/stackedbooks.png';
 import { Book, months, Status } from '../utils';
 import { useBookContext } from './Context';
+import Tags from './Tags';
 
-const Cards: React.FC = () => {
+const Cards = () => {
 	const { setDateCount, books, setBooks, setYears, authors, setAuthors } =
 		useBookContext();
 
@@ -152,6 +153,7 @@ const Cards: React.FC = () => {
 				{showAuthorValidation && (
 					<div className='validation-popup'>👤 Please enter an author!</div>
 				)}
+				<Tags />
 				<button
 					id='to-read'
 					className='book-input-btn'
@@ -208,7 +210,7 @@ const Cards: React.FC = () => {
 						</select>
 					</div>
 					<div className='year-input-container'>
-						<button className='year-btn' onClick={decrementYear}>
+						<button className='decrement-year-btn' onClick={decrementYear}>
 							–
 						</button>
 						<input
@@ -216,9 +218,13 @@ const Cards: React.FC = () => {
 							type='text'
 							inputMode='numeric'
 							value={year > currentYear ? currentYear : year}
-							onChange={(event) => setYear(Number(event.target.value))}
+							onChange={(event) => {
+								if (/^\d*$/.test(event.target.value)) {
+									setYear(Number(event.target.value));
+								}
+							}}
 						/>
-						<button className='year-btn' onClick={incrementYear}>
+						<button className='increment-year-btn' onClick={incrementYear}>
 							+
 						</button>
 					</div>

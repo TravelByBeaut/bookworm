@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import worm from '../images/worm.png';
 import '../styles/header.css';
 
-const Header: React.FC = () => {
+const Header = () => {
 	return (
 		<div>
 			<nav className='nav'>

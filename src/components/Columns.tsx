@@ -7,7 +7,7 @@ import '../styles/columns.css';
 import { useState } from 'react';
 import { useBookContext } from './Context';
 
-const Columns: React.FC = () => {
+const Columns = () => {
 	const { setDateCount, books, setBooks, setYears, authors, setAuthors } =
 		useBookContext();
 	const [toReadPage, setToReadPage] = useState(0);

@@ -23,7 +23,7 @@ ChartJS.register(
 	Legend
 );
 
-const Graph: React.FC = () => {
+const Graph = () => {
 	const { dateCount, books, years, authors } = useBookContext();
 	const [selectedYear, setSelectedYear] = useState<number>(2025);
 	const [selectedAuthor, setSelectedAuthor] = useState<string>('');

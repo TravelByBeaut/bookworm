@@ -1,6 +1,6 @@
 import '../styles/home.css';
 
-const Home: React.FC = () => {
+const Home = () => {
 	return (
 		<div className='home-container'>
 			<h1>Welcome!</h1>
