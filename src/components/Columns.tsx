@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useBookContext } from './Context';
 
 const Columns = () => {
-	const { setDateCount, books, setBooks, setYears, authors, setAuthors } =
+	const { setDateCount, books, setBooks, setYears, setAuthors } =
 		useBookContext();
 	const [toReadPage, setToReadPage] = useState(0);
 	const [readingPage, setReadingPage] = useState(0);
