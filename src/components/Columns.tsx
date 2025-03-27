@@ -72,6 +72,7 @@ const Columns = () => {
 	const getAuthorsFromBooks = (books: Book[]) => {
 		const authorsSet = new Set<string>();
 		books.forEach((book) => {
+			console.log(book.status);
 			if (book.status === Status.Completed) {
 				authorsSet.add(book.author);
 			}
@@ -116,7 +117,8 @@ const Columns = () => {
 		if (updatedBook) {
 			if (newStatus === Status.Completed && oldStatus !== Status.Completed) {
 				addDataToDateCount(updatedBook);
-				setAuthors([...authors, updatedBook.author]);
+				updatedBook.status = newStatus;
+				setAuthors(getAuthorsFromBooks([...books, updatedBook]));
 			}
 			if (oldStatus === Status.Completed && newStatus === Status.Completed) {
 				return;
