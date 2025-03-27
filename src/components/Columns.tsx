@@ -72,7 +72,6 @@ const Columns = () => {
 	const getAuthorsFromBooks = (books: Book[]) => {
 		const authorsSet = new Set<string>();
 		books.forEach((book) => {
-			console.log(book.status);
 			if (book.status === Status.Completed) {
 				authorsSet.add(book.author);
 			}
